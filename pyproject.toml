@@ -1,0 +1,91 @@
+[build-system]
+requires = ["setuptools>=77.0.3"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "probpipe-benchmark"
+version = "0.1.0"
+description = "Heavy posterior-recovery benchmark harness for ProbPipe inference methods"
+readme = "README.md"
+requires-python = ">=3.12"
+license = "Apache-2.0"
+license-files = ["LICENSE"]
+authors = [
+  { name = "ProbPipe Development Team", email = "huggins@bu.edu" },
+]
+dependencies = [
+  "probpipe-core>=0.1.0,<0.2.0",
+]
+
+[project.optional-dependencies]
+dev = [
+  "pytest>=7",
+  "pytest-cov",
+  "pytest-xdist",
+  "pyright[nodejs]==1.1.410",
+  "ruff==0.15.16",
+  "pre-commit",
+]
+
+[project.scripts]
+probpipe-benchmark = "probpipe_benchmark.cli:main"
+
+[project.urls]
+Repository = "https://github.com/TARPS-group/prob-pipe-benchmark"
+ProbPipe = "https://github.com/TARPS-group/prob-pipe"
+"ProbPipe Documentation" = "https://tarps-group.github.io/prob-pipe/"
+
+[tool.setuptools]
+package-dir = {"" = "src"}
+
+[tool.setuptools.packages.find]
+where = ["src"]
+include = ["probpipe_benchmark*"]
+
+[tool.setuptools.package-data]
+probpipe_benchmark = ["py.typed"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-v --cov=probpipe_benchmark --cov-report=term-missing --cov-fail-under=0"
+markers = [
+  "optional: tests requiring optional benchmark dependencies",
+  "offline: tests requiring heavy local data / compiled models",
+  "slow: slow benchmark tests",
+]
+
+[tool.ruff]
+target-version = "py312"
+line-length = 100
+
+[tool.ruff.format]
+quote-style = "double"
+exclude = ["*.ipynb"]
+
+[tool.ruff.lint]
+select = [
+  "E",
+  "W",
+  "F",
+  "I",
+  "UP",
+  "B",
+  "SIM",
+  "RUF",
+]
+ignore = [
+  "E501",
+  "B905",
+  "SIM108",
+  "SIM102",
+  "RUF001",
+  "RUF002",
+  "RUF003",
+]
+
+[tool.ruff.lint.per-file-ignores]
+"__init__.py" = ["F401", "E402"]
+"tests/**" = ["E402"]
+
+[tool.ruff.lint.isort]
+known-first-party = ["probpipe_benchmark"]
