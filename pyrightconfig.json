@@ -1,0 +1,8 @@
+{
+  "include": ["src/probpipe_benchmark"],
+  "pythonVersion": "3.12",
+  "typeCheckingMode": "basic",
+  "venvPath": ".",
+  "venv": ".venv",
+  "reportMissingTypeStubs": "none"
+}

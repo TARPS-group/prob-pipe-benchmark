@@ -1,0 +1,114 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  lint:
+    name: lint & format
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out benchmark repository
+        uses: actions/checkout@v7
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v7
+        with:
+          enable-cache: true
+
+      - name: Validate pre-commit config
+        run: uvx pre-commit validate-config
+
+      - name: Resolve Ruff version from pre-commit config
+        id: ruffver
+        run: |
+          set -euo pipefail
+          ver=$(grep -A2 'astral-sh/ruff-pre-commit' .pre-commit-config.yaml \
+                  | sed -nE 's/^[[:space:]]*rev:[[:space:]]*v?([0-9][0-9.]*).*/\1/p' | head -1)
+          test -n "$ver"
+          echo "ruff=$ver" >> "$GITHUB_OUTPUT"
+          echo "Resolved Ruff $ver from .pre-commit-config.yaml"
+
+      - name: Ruff check
+        run: uvx "ruff@${{ steps.ruffver.outputs.ruff }}" check . --output-format=github
+
+      - name: Ruff format check
+        run: uvx "ruff@${{ steps.ruffver.outputs.ruff }}" format --check .
+
+  typecheck:
+    name: typecheck
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out benchmark repository
+        uses: actions/checkout@v7
+        with:
+          path: prob-pipe-benchmark
+
+      - name: Check out ProbPipe
+        uses: actions/checkout@v7
+        with:
+          repository: TARPS-group/prob-pipe
+          path: prob-pipe
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v7
+        with:
+          enable-cache: true
+
+      - name: Install dependencies
+        run: |
+          cd prob-pipe-benchmark
+          uv venv --python 3.12
+          uv pip install -e ../prob-pipe
+          uv pip install --no-deps -e .
+          uv pip install "pyright[nodejs]==1.1.410"
+
+      - name: Pyright
+        run: |
+          cd prob-pipe-benchmark
+          .venv/bin/pyright
+
+  test:
+    name: test (${{ matrix.python-version }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.12", "3.13", "3.14"]
+
+    steps:
+      - name: Check out benchmark repository
+        uses: actions/checkout@v7
+        with:
+          path: prob-pipe-benchmark
+
+      - name: Check out ProbPipe
+        uses: actions/checkout@v7
+        with:
+          repository: TARPS-group/prob-pipe
+          path: prob-pipe
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v7
+        with:
+          enable-cache: true
+
+      - name: Install dependencies
+        run: |
+          cd prob-pipe-benchmark
+          uv venv --python ${{ matrix.python-version }}
+          uv pip install -e ../prob-pipe
+          uv pip install --no-deps -e .
+          uv pip install "pytest>=7" pytest-cov pytest-xdist
+
+      - name: Run tests
+        run: |
+          cd prob-pipe-benchmark
+          .venv/bin/pytest -m "not optional and not offline and not slow"
