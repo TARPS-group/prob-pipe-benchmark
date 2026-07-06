@@ -2,18 +2,13 @@
 
 from __future__ import annotations
 
-from importlib.metadata import PackageNotFoundError, version
+from importlib.metadata import PackageNotFoundError as _PackageNotFoundError
+from importlib.metadata import version as _version
 
-_DISTRIBUTION_NAME = "probpipe-benchmark"
-
-
-def _package_version() -> str:
-    try:
-        return version(_DISTRIBUTION_NAME)
-    except PackageNotFoundError:
-        return "0.1.0"
-
-
-__version__ = _package_version()
+# Version is read from the installed ``probpipe-benchmark`` distribution.
+try:
+    __version__ = _version("probpipe-benchmark")
+except _PackageNotFoundError:  # pragma: no cover - source tree with no install
+    __version__ = "0.0.0+unknown"
 
 __all__ = ["__version__"]

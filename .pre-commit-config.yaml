@@ -1,3 +1,6 @@
+# This ruff rev is the single source of truth for the version: the CI lint job
+# reads it from here, and the `dev` extra pin in pyproject.toml must be kept in
+# sync with it (this repo has no uv.lock to pin ruff automatically).
 repos:
   - repo: https://github.com/astral-sh/ruff-pre-commit
     rev: v0.15.16
