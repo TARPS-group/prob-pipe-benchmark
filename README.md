@@ -37,7 +37,9 @@ still imports `probpipe`; `probpipe-core` is the minimal distribution that
 provides that import package. Until `probpipe-core` is published, the sibling
 `uv pip install -e ../prob-pipe` provides `probpipe-core` locally, so the
 subsequent `.[dev]` install finds it already satisfied and does not look for it
-on PyPI. The `dev` extra pins the same lint/type/test tool versions CI uses.
+on PyPI. The `dev` extra installs the same tooling CI uses and pins Ruff and
+Pyright to the exact CI versions (their check output must match); the test and
+pre-commit tools float.
 
 Run scaffold checks:
 
