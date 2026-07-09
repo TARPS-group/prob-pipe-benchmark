@@ -22,6 +22,10 @@ dev = [
   "pytest>=7",
   "pytest-cov",
   "pytest-xdist",
+  # ruff and pyright are pinned to match CI. Unlike prob-pipe (whose uv.lock
+  # pins them, so its dev extra can leave ruff unpinned), this repo has no
+  # lockfile, so these pins are the local<->CI parity mechanism. Keep ruff in
+  # sync with the .pre-commit-config.yaml rev — the version CI resolves from.
   "pyright[nodejs]==1.1.410",
   "ruff==0.15.16",
   "pre-commit",
@@ -47,7 +51,7 @@ probpipe_benchmark = ["py.typed"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
-addopts = "-v --cov=probpipe_benchmark --cov-report=term-missing --cov-fail-under=0"
+addopts = "-n auto --dist worksteal -v --cov=probpipe_benchmark --cov-report=term-missing --cov-fail-under=0"
 markers = [
   "optional: tests requiring optional benchmark dependencies",
   "offline: tests requiring heavy local data / compiled models",

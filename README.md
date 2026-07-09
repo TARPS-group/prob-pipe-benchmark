@@ -29,16 +29,17 @@ Create an environment and install both packages:
 uv venv --python 3.12
 source .venv/bin/activate
 uv pip install -e ../prob-pipe
-uv pip install --no-deps -e .
-uv pip install "pytest>=7" pytest-cov pytest-xdist "ruff==0.15.16" pre-commit "pyright[nodejs]==1.1.410"
+uv pip install -e ".[dev]"
 ```
 
 The benchmark package depends on the `probpipe-core` distribution. User code
 still imports `probpipe`; `probpipe-core` is the minimal distribution that
-provides that import package. Until `probpipe-core` is published, the local
-development setup installs ProbPipe from the sibling checkout and installs this
-package with `--no-deps` so the resolver does not look for `probpipe-core` on
-PyPI.
+provides that import package. Until `probpipe-core` is published, the sibling
+`uv pip install -e ../prob-pipe` provides `probpipe-core` locally, so the
+subsequent `.[dev]` install finds it already satisfied and does not look for it
+on PyPI. The `dev` extra installs the same tooling CI uses and pins Ruff and
+Pyright to the exact CI versions (their check output must match); the test and
+pre-commit tools float.
 
 Run scaffold checks:
 
